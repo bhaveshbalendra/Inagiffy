@@ -24,7 +24,7 @@ app.use(cookieParser());
 
 //Middlewares
 app.use(bodyParser.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Global Rate Limiter (e.g., 100 requests per minute per IP)
@@ -34,7 +34,8 @@ app.use(cookieParser());
 app.use(cors(corsOptions));
 
 //Health Check Route
-app.get("/", (req: express.Request, res: express.Response) => {
+import type { Request, Response } from "express";
+app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
 });
 

@@ -21,10 +21,5 @@
     /* Completeness */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": [
-    "src",
-    "src/types",
-    "../frontend/src/types/feedTypes.ts",
-    "src/controller/.controller.ts"
-  ]
+  "include": ["src", "src/types/**/*"]
 }
