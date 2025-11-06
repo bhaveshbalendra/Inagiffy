@@ -42,8 +42,8 @@ function MapNode({ data, selected }: NodeProps<MapNodeData>) {
 
   return (
     <div
-      className={`px-4 py-3 rounded-lg border-2 shadow-lg bg-white min-w-[200px] max-w-[300px] ${
-        selected ? "border-primary" : "border-gray-200"
+      className={`px-4 py-3 rounded-lg border-2 shadow-lg bg-white min-w-[220px] max-w-[320px] z-10 ${
+        selected ? "border-primary ring-2 ring-primary" : "border-gray-200"
       }`}
     >
       <Handle type="target" position={Position.Top} />
@@ -100,21 +100,27 @@ function convertMapToFlowData(learningMap: LearningMap): {
   const nodes: Node<MapNodeData>[] = [];
   const edges: Edge[] = [];
 
+  // Calculate center X position for root node
+  const totalWidth = learningMap.branches.length * 350; // Increased spacing
+  const centerX = totalWidth / 2;
+
   // Create root topic node
   const rootNodeId = "root";
   nodes.push({
     id: rootNodeId,
     type: "mapNode",
-    position: { x: 400, y: 50 },
+    position: { x: centerX, y: 50 },
     data: {
       label: learningMap.topic,
       type: "topic",
     },
   });
 
-  let currentY = 200;
-  const branchSpacing = 250;
-  const branchStartX = 100;
+  const branchY = 200;
+  const branchSpacing = 350; // Increased from 250 to prevent overlaps
+  const branchStartX = 50;
+  const subtopicSpacing = 150; // Increased from 120 to prevent overlaps
+  const subtopicOffsetY = 180; // Increased from 150
 
   // Create branch nodes and their subtopics
   learningMap.branches.forEach((branch, branchIndex) => {
@@ -124,7 +130,7 @@ function convertMapToFlowData(learningMap: LearningMap): {
     nodes.push({
       id: branchNodeId,
       type: "mapNode",
-      position: { x: branchX, y: currentY },
+      position: { x: branchX, y: branchY },
       data: {
         label: branch.title,
         description: branch.description,
@@ -141,11 +147,12 @@ function convertMapToFlowData(learningMap: LearningMap): {
       animated: true,
     });
 
-    // Create subtopic nodes
+    // Create subtopic nodes with proper spacing
     branch.subtopics.forEach((subtopic, subtopicIndex) => {
       const subtopicNodeId = `subtopic-${branchIndex}-${subtopicIndex}`;
       const subtopicX = branchX;
-      const subtopicY = currentY + 150 + subtopicIndex * 120;
+      const subtopicY =
+        branchY + subtopicOffsetY + subtopicIndex * subtopicSpacing;
 
       nodes.push({
         id: subtopicNodeId,
@@ -167,12 +174,6 @@ function convertMapToFlowData(learningMap: LearningMap): {
         type: "smoothstep",
       });
     });
-
-    // Update currentY for next branch if needed
-    const maxSubtopicY = currentY + 150 + branch.subtopics.length * 120;
-    if (maxSubtopicY > currentY) {
-      currentY = maxSubtopicY;
-    }
   });
 
   return { nodes, edges };
@@ -191,13 +192,15 @@ export function LearningMapVisualization({
   );
 
   return (
-    <div className="w-full h-[600px] border rounded-lg bg-gray-50">
+    <div className="w-full h-[800px] border rounded-lg bg-gray-50 overflow-hidden">
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
+        fitViewOptions={{ padding: 0.3, maxZoom: 1.5 }}
+        minZoom={0.3}
+        maxZoom={2}
       >
         <Background />
         <Controls />
