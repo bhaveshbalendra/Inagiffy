@@ -21,7 +21,7 @@ export class AppError extends Error {
     this.statusCode = statusCode;
     this.isOperational = true;
     // Capture stack trace if available (Node.js only)
-    if (Error.captureStackTrace) {
+    if (typeof Error.captureStackTrace === "function") {
       Error.captureStackTrace(this, this.constructor);
     }
   }

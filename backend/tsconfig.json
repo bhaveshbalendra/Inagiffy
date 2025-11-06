@@ -21,5 +21,6 @@
     /* Completeness */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": ["src", "src/types/**/*"]
+  "include": ["src/**/*", "src/types/**/*"],
+  "typeRoots": ["./node_modules/@types", "./src/types"]
 }

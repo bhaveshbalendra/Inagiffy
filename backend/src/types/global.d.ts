@@ -91,14 +91,36 @@ declare module "express-rate-limit" {
 }
 
 declare module "mongoose" {
-  import { Connection, Document, Model, Schema } from "mongoose";
-  export function connect(uri: string, options?: any): Promise<typeof mongoose>;
+  export interface Document {
+    _id?: any;
+    save(): Promise<this>;
+    toObject(): any;
+  }
+  export interface Model<T extends Document> {
+    new (data?: any): T;
+    findById(id: string): Promise<T | null>;
+    find(query?: any): Promise<T[]>;
+    create(data: any): Promise<T>;
+  }
+  export interface Schema {
+    new (definition?: any, options?: any): Schema;
+  }
+  export interface Connection {
+    readyState: number;
+  }
+  export function connect(uri: string, options?: any): Promise<any>;
   export function disconnect(): Promise<void>;
   export function model<T extends Document>(
     name: string,
     schema?: Schema
   ): Model<T>;
   export const connection: Connection;
+  const mongoose: {
+    connect: typeof connect;
+    disconnect: typeof disconnect;
+    model: typeof model;
+    connection: Connection;
+  };
   export default mongoose;
 }
 
@@ -130,6 +152,7 @@ declare module "dotenv" {
   export function config(options?: any): { parsed?: Record<string, string> };
 }
 
+// Node.js global types
 declare namespace NodeJS {
   interface ProcessEnv {
     [key: string]: string | undefined;
@@ -141,3 +164,17 @@ declare var process: {
   exit(code?: number): never;
   on(event: string, listener: (...args: any[]) => void): void;
 };
+
+// Console global (Node.js)
+declare var console: {
+  log(...args: any[]): void;
+  info(...args: any[]): void;
+  warn(...args: any[]): void;
+  error(...args: any[]): void;
+  debug(...args: any[]): void;
+};
+
+// Error.captureStackTrace (Node.js specific)
+interface ErrorConstructor {
+  captureStackTrace?(errorObject: Error, constructorOpt?: Function): void;
+}
