@@ -34,7 +34,7 @@ app.use(cookieParser());
 app.use(cors(corsOptions));
 
 //Health Check Route
-app.get("/", (req, res) => {
+app.get("/", (req: express.Request, res: express.Response) => {
   res.send("Hello, World!");
 });
 

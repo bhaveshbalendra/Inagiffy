@@ -20,7 +20,10 @@ export class AppError extends Error {
     super(message);
     this.statusCode = statusCode;
     this.isOperational = true;
-    Error.captureStackTrace(this, this.constructor);
+    // Capture stack trace if available (Node.js only)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
   }
 
   // Creating a validation error instance
