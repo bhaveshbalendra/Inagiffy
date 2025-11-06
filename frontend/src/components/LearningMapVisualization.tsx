@@ -92,6 +92,7 @@ const nodeTypes = {
 
 /**
  * Converts learning map data to ReactFlow nodes and edges
+ * Creates a vertical timeline layout with cards stacked vertically
  */
 function convertMapToFlowData(learningMap: LearningMap): {
   nodes: Node<MapNodeData>[];
@@ -100,37 +101,34 @@ function convertMapToFlowData(learningMap: LearningMap): {
   const nodes: Node<MapNodeData>[] = [];
   const edges: Edge[] = [];
 
-  // Calculate center X position for root node
-  const totalWidth = learningMap.branches.length * 350; // Increased spacing
-  const centerX = totalWidth / 2;
+  // Center X position for all nodes (vertical timeline)
+  const centerX = 400;
+  let currentY = 50;
+  const verticalSpacing = 200; // Spacing between cards
 
-  // Create root topic node
+  // Create root topic node at the top
   const rootNodeId = "root";
   nodes.push({
     id: rootNodeId,
     type: "mapNode",
-    position: { x: centerX, y: 50 },
+    position: { x: centerX, y: currentY },
     data: {
       label: learningMap.topic,
       type: "topic",
     },
   });
 
-  const branchY = 200;
-  const branchSpacing = 350; // Increased from 250 to prevent overlaps
-  const branchStartX = 50;
-  const subtopicSpacing = 150; // Increased from 120 to prevent overlaps
-  const subtopicOffsetY = 180; // Increased from 150
+  currentY += verticalSpacing;
 
-  // Create branch nodes and their subtopics
+  // Create branch nodes and their subtopics in vertical stack
   learningMap.branches.forEach((branch, branchIndex) => {
     const branchNodeId = `branch-${branchIndex}`;
-    const branchX = branchStartX + branchIndex * branchSpacing;
 
+    // Create branch node
     nodes.push({
       id: branchNodeId,
       type: "mapNode",
-      position: { x: branchX, y: branchY },
+      position: { x: centerX, y: currentY },
       data: {
         label: branch.title,
         description: branch.description,
@@ -138,26 +136,36 @@ function convertMapToFlowData(learningMap: LearningMap): {
       },
     });
 
-    // Connect root to branch
-    edges.push({
-      id: `edge-${rootNodeId}-${branchNodeId}`,
-      source: rootNodeId,
-      target: branchNodeId,
-      type: "smoothstep",
-      animated: true,
-    });
+    // Connect root to first branch, or previous branch to current branch
+    if (branchIndex === 0) {
+      edges.push({
+        id: `edge-${rootNodeId}-${branchNodeId}`,
+        source: rootNodeId,
+        target: branchNodeId,
+        type: "straight",
+        animated: true,
+      });
+    } else {
+      const prevBranchNodeId = `branch-${branchIndex - 1}`;
+      edges.push({
+        id: `edge-${prevBranchNodeId}-${branchNodeId}`,
+        source: prevBranchNodeId,
+        target: branchNodeId,
+        type: "straight",
+        animated: true,
+      });
+    }
 
-    // Create subtopic nodes with proper spacing
+    currentY += verticalSpacing;
+
+    // Create subtopic nodes for this branch
     branch.subtopics.forEach((subtopic, subtopicIndex) => {
       const subtopicNodeId = `subtopic-${branchIndex}-${subtopicIndex}`;
-      const subtopicX = branchX;
-      const subtopicY =
-        branchY + subtopicOffsetY + subtopicIndex * subtopicSpacing;
 
       nodes.push({
         id: subtopicNodeId,
         type: "mapNode",
-        position: { x: subtopicX, y: subtopicY },
+        position: { x: centerX, y: currentY },
         data: {
           label: subtopic.title,
           description: subtopic.description,
@@ -166,13 +174,27 @@ function convertMapToFlowData(learningMap: LearningMap): {
         },
       });
 
-      // Connect branch to subtopic
-      edges.push({
-        id: `edge-${branchNodeId}-${subtopicNodeId}`,
-        source: branchNodeId,
-        target: subtopicNodeId,
-        type: "smoothstep",
-      });
+      // Connect branch to first subtopic, or previous subtopic to current subtopic
+      if (subtopicIndex === 0) {
+        edges.push({
+          id: `edge-${branchNodeId}-${subtopicNodeId}`,
+          source: branchNodeId,
+          target: subtopicNodeId,
+          type: "straight",
+        });
+      } else {
+        const prevSubtopicNodeId = `subtopic-${branchIndex}-${
+          subtopicIndex - 1
+        }`;
+        edges.push({
+          id: `edge-${prevSubtopicNodeId}-${subtopicNodeId}`,
+          source: prevSubtopicNodeId,
+          target: subtopicNodeId,
+          type: "straight",
+        });
+      }
+
+      currentY += verticalSpacing;
     });
   });
 
@@ -198,9 +220,10 @@ export function LearningMapVisualization({
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.3, maxZoom: 1.5 }}
-        minZoom={0.3}
-        maxZoom={2}
+        fitViewOptions={{ padding: 0.2, maxZoom: 1.2 }}
+        minZoom={0.5}
+        maxZoom={1.5}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
       >
         <Background />
         <Controls />
