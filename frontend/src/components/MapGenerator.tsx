@@ -165,9 +165,16 @@ export function MapGenerator() {
           <CardContent className="flex items-center justify-center py-12">
             <div className="text-center space-y-4">
               <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-              <p className="text-muted-foreground">
-                Generating your learning map... This may take a moment.
-              </p>
+              <div className="space-y-2">
+                <p className="text-muted-foreground">
+                  Generating your learning map... This may take a moment.
+                </p>
+                <p className="text-sm text-muted-foreground/80">
+                  Note: The backend service may be sleeping. Please wait up to
+                  50 seconds for it to wake up. Because it is a free tier, it
+                  may take a while to wake up.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -28,13 +28,17 @@ interface GenerateMapRequest {
   level: LearningLevel;
 }
 
-// Retry configuration
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
+// Retry configuration for Render free tier (backend may sleep)
+const MAX_RETRIES = 10; // Increased for Render cold start (up to 50 seconds)
+const INITIAL_RETRY_DELAY = 5000; // 5 seconds for first retry (backend wake-up)
+const RETRY_DELAY = 5000; // 5 seconds for subsequent retries
 
-// Calculate delay for retry (exponential backoff)
+// Calculate delay for retry (longer delays for cold start)
 function calculateRetryDelay(attempt: number): number {
-  return RETRY_DELAY * Math.pow(2, attempt);
+  if (attempt === 0) {
+    return INITIAL_RETRY_DELAY; // First retry: wait 5 seconds
+  }
+  return RETRY_DELAY; // Subsequent retries: wait 5 seconds each
 }
 
 // Custom base query with centralized error handling and retry logic
